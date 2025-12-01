@@ -15,11 +15,11 @@ module YouTubeTranslator
       @api_key = YouTubeTranslator.configuration.innertube_api_key
     end
 
-    def fetch(lang_code = nil)
+    def fetch(lang_code = nil, prefer_auto: false)
       captions = fetch_caption_tracks
       raise NoCaptionsError, 'No captions available for this video' if captions.empty?
 
-      url = find_transcript_url(captions, lang_code)
+      url = find_transcript_url(captions, lang_code, prefer_auto: prefer_auto)
       raise NoCaptionsError, 'No transcript URL found' unless url
 
       fetch_transcript(url)
@@ -27,9 +27,12 @@ module YouTubeTranslator
 
     def available_languages
       fetch_caption_tracks.map do |track|
+        name = track.dig('name', 'simpleText') || track['languageCode']
+        # YouTube sometimes includes "(auto-generated)" in the name, strip it
+        name = name.sub(/\s*\(auto-generated\)\s*/i, '').strip
         Language.new(
           code: track['languageCode'],
-          name: track.dig('name', 'simpleText') || track['languageCode'],
+          name: name,
           auto_generated: track['kind'] == 'asr'
         )
       end
@@ -63,10 +66,22 @@ module YouTubeTranslator
       }
     end
 
-    def find_transcript_url(captions, lang_code)
+    def find_transcript_url(captions, lang_code, prefer_auto: false)
       track = if lang_code
-                captions.find { |t| t['languageCode'] == lang_code }
+                # If language specified, try to find exact match
+                # If prefer_auto, look for auto-generated version first
+                if prefer_auto
+                  captions.find { |t| t['languageCode'] == lang_code && t['kind'] == 'asr' } ||
+                    captions.find { |t| t['languageCode'] == lang_code }
+                else
+                  captions.find { |t| t['languageCode'] == lang_code && t['kind'] != 'asr' } ||
+                    captions.find { |t| t['languageCode'] == lang_code }
+                end
+              elsif prefer_auto
+                # Prefer auto-generated if available
+                captions.find { |t| t['kind'] == 'asr' } || captions.first
               else
+                # Prefer manual captions
                 captions.find { |t| t['kind'] != 'asr' } || captions.first
               end
 

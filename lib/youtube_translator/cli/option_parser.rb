@@ -107,6 +107,10 @@ module YouTubeTranslator
         opts.on('-t', '--target LANG', 'Target language code') do |l|
           @options[:target_lang] = l
         end
+
+        opts.on('--auto', 'Prefer auto-generated transcripts') do
+          @options[:prefer_auto] = true
+        end
       end
 
       def configure_output_options(opts)

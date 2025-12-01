@@ -12,7 +12,7 @@ module YouTubeTranslator
         def run
           log "Fetching transcript for: #{video_url}"
 
-          segments = fetcher.fetch(source_lang)
+          segments = fetcher.fetch(source_lang, prefer_auto: @options[:prefer_auto])
 
           log "Found #{segments.size} segments#{lang_suffix}\n\n"
 
