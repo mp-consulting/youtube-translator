@@ -27,8 +27,7 @@ module YouTubeTranslator
         end
 
         def lang_suffix
-          lang = source_lang
-          lang ? " (#{lang})" : ''
+          source_lang ? " (#{source_lang})" : ''
         end
       end
     end

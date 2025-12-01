@@ -5,6 +5,16 @@ module YouTubeTranslator
     # Factory for creating translator instances
     # Factory Method pattern
     class Factory
+      DEFAULT_MODELS = {
+        'openai' => 'gpt-4o-mini',
+        'anthropic' => 'claude-sonnet-4-5-20250929'
+      }.freeze
+
+      PROVIDERS = {
+        'anthropic' => Anthropic,
+        'openai' => ChatGPT
+      }.freeze
+
       def self.build(source_lang, target_lang, options = {})
         new(source_lang, target_lang, options).build
       end
@@ -16,22 +26,13 @@ module YouTubeTranslator
       end
 
       def build
-        case provider
-        when 'anthropic'
-          Anthropic.new(@source_lang, @target_lang, api_options)
-        when 'openai'
-          ChatGPT.new(@source_lang, @target_lang, api_options)
-        else
-          Local.new(@source_lang, @target_lang)
-        end
+        klass = PROVIDERS[provider]
+        return Local.new(@source_lang, @target_lang) unless klass
+
+        klass.new(@source_lang, @target_lang, api_options)
       end
 
       private
-
-      DEFAULT_MODELS = {
-        'openai' => 'gpt-4o-mini',
-        'anthropic' => 'claude-sonnet-4-5-20250929'
-      }.freeze
 
       def provider
         @options[:provider] || YouTubeTranslator.configuration.llm_provider

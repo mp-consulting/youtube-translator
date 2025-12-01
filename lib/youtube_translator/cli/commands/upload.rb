@@ -5,21 +5,27 @@ module YouTubeTranslator
     module Commands
       # Uploads captions to YouTube
       class Upload < Base
+        LANGUAGE_NAMES = {
+          'en' => 'English', 'fr' => 'French', 'es' => 'Spanish',
+          'de' => 'German', 'it' => 'Italian', 'pt' => 'Portuguese',
+          'pt-BR' => 'Portuguese (Brazil)', 'ja' => 'Japanese',
+          'ko' => 'Korean', 'zh' => 'Chinese',
+          'zh-Hans' => 'Chinese (Simplified)',
+          'zh-Hant' => 'Chinese (Traditional)',
+          'ru' => 'Russian', 'ar' => 'Arabic', 'nl' => 'Dutch',
+          'pl' => 'Polish', 'cs' => 'Czech', 'sv' => 'Swedish',
+          'da' => 'Danish', 'fi' => 'Finnish', 'no' => 'Norwegian'
+        }.freeze
+
+        LANG_PATTERN = /(?:translated_)?([a-z]{2}(?:-[A-Z]{2})?)\./.freeze
+
         def execute
           validate_args!
-          
+
           uploader = YouTubeTranslator::YoutubeUploader.new
           uploader.authenticate!
 
-          content = load_content
-          result = uploader.upload_caption(
-            video_id,
-            language,
-            content,
-            name: caption_name,
-            draft: @options[:draft]
-          )
-
+          result = uploader.upload_caption(video_id, language, load_content, upload_options)
           display_result(result)
         end
 
@@ -30,7 +36,7 @@ module YouTubeTranslator
         end
 
         def video_id
-          VideoIdExtractor.extract(@args[0])
+          @video_id ||= VideoIdExtractor.extract(@args[0])
         end
 
         def file_or_lang
@@ -38,35 +44,38 @@ module YouTubeTranslator
         end
 
         def language
-          @options[:target_lang] || detect_language
+          @language ||= @options[:target_lang] || detect_language
         end
 
         def detect_language
-          # If second arg looks like a file, try to extract language from filename
-          if File.exist?(file_or_lang)
-            # e.g., translated_fr.txt -> fr
-            if match = File.basename(file_or_lang).match(/(?:translated_)?([a-z]{2}(?:-[A-Z]{2})?)\./)
-              return match[1]
-            end
-          end
-          
-          # Default to treating second arg as language code
+          return extract_lang_from_filename if File.exist?(file_or_lang)
+
           file_or_lang
         end
 
+        def extract_lang_from_filename
+          match = File.basename(file_or_lang).match(LANG_PATTERN)
+          match ? match[1] : file_or_lang
+        end
+
         def load_content
-          if File.exist?(file_or_lang)
-            File.read(file_or_lang, encoding: 'UTF-8')
-          elsif File.exist?(review_file_path)
-            File.read(review_file_path, encoding: 'UTF-8')
-          else
-            raise Error, "File not found: #{file_or_lang}"
-          end
+          path = content_file_path
+          raise Error, "File not found: #{file_or_lang}" unless path
+
+          File.read(path, encoding: 'UTF-8')
+        end
+
+        def content_file_path
+          [file_or_lang, review_file_path].find { |p| File.exist?(p) }
         end
 
         def review_file_path
-          provider = @options[:provider] || YouTubeTranslator.configuration.llm_provider
+          provider = effective_provider
           File.join('reviews', provider, video_id, "translated_#{language}.txt")
+        end
+
+        def upload_options
+          { name: caption_name, draft: @options[:draft] }
         end
 
         def caption_name
@@ -74,43 +83,21 @@ module YouTubeTranslator
         end
 
         def language_name
-          # Map common language codes to names
-          names = {
-            'en' => 'English',
-            'fr' => 'French',
-            'es' => 'Spanish',
-            'de' => 'German',
-            'it' => 'Italian',
-            'pt' => 'Portuguese',
-            'pt-BR' => 'Portuguese (Brazil)',
-            'ja' => 'Japanese',
-            'ko' => 'Korean',
-            'zh' => 'Chinese',
-            'zh-Hans' => 'Chinese (Simplified)',
-            'zh-Hant' => 'Chinese (Traditional)',
-            'ru' => 'Russian',
-            'ar' => 'Arabic',
-            'nl' => 'Dutch',
-            'pl' => 'Polish',
-            'cs' => 'Czech',
-            'sv' => 'Swedish',
-            'da' => 'Danish',
-            'fi' => 'Finnish',
-            'no' => 'Norwegian'
-          }
-          names[language] || language.upcase
+          LANGUAGE_NAMES.fetch(language, language.upcase)
         end
 
         def display_result(result)
-          if result && result['id']
-            puts "✓ Caption uploaded successfully!"
-            puts "  Caption ID: #{result['id']}"
-            puts "  Language: #{result.dig('snippet', 'language')}"
-            puts "  Name: #{result.dig('snippet', 'name')}"
-            puts "  Draft: #{result.dig('snippet', 'isDraft')}"
-          else
-            puts "Caption uploaded."
-          end
+          return puts 'Caption uploaded.' unless result&.dig('id')
+
+          display_success(result)
+        end
+
+        def display_success(result)
+          puts '✓ Caption uploaded successfully!'
+          puts "  Caption ID: #{result['id']}"
+          puts "  Language: #{result.dig('snippet', 'language')}"
+          puts "  Name: #{result.dig('snippet', 'name')}"
+          puts "  Draft: #{result.dig('snippet', 'isDraft')}"
         end
       end
     end

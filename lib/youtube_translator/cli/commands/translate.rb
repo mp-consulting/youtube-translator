@@ -10,22 +10,28 @@ module YouTubeTranslator
         end
 
         def run
-          log "Fetching transcript (#{@options[:source_lang]}) for: #{video_url}"
-
-          segments = fetcher.fetch(@options[:source_lang], prefer_auto: @options[:prefer_auto])
-          log "Found #{segments.size} segments"
-
-          log_translation_method
-          translated = translator.translate_segments(segments)
-
-          output = format_output(translated)
-          write_output(output)
+          segments = fetch_segments
+          translated = translate_segments(segments)
+          write_output(format_output(translated))
         end
 
         private
 
+        def fetch_segments
+          log "Fetching transcript (#{@options[:source_lang]}) for: #{video_url}"
+          segments = fetcher.fetch(@options[:source_lang], prefer_auto: @options[:prefer_auto])
+          log "Found #{segments.size} segments"
+          segments
+        end
+
+        def translate_segments(segments)
+          log_translation_method
+          translator.translate_segments(segments)
+        end
+
         def log_translation_method
-          log "Translating with #{effective_provider} (#{effective_model}) from #{@options[:source_lang]} to #{@options[:target_lang]}..."
+          log "Translating with #{effective_provider} (#{effective_model}) " \
+              "from #{@options[:source_lang]} to #{@options[:target_lang]}..."
         end
       end
     end

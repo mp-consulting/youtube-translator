@@ -24,35 +24,45 @@ module YouTubeTranslator
         end
 
         def run_review
-          log "Fetching transcript (#{@options[:source_lang]}) for: #{video_url}"
-
-          segments = fetcher.fetch(@options[:source_lang], prefer_auto: @options[:prefer_auto])
-          log "Found #{segments.size} segments"
-
-          log_translation_method
-          translated = translator.translate_segments(segments)
-          log 'Translation complete!'
-
-          review_manager = build_review_manager
-          review_file = review_manager.save_for_review(segments, translated)
-
-          log_review_files(review_manager, review_file)
+          segments = fetch_source_segments
+          translated = translate_with_logging(segments)
+          save_review_files(segments, translated)
         end
 
         def run_translate_reviewed
+          segments = load_reviewed_segments
+          translated = translate_with_logging(segments)
+          write_output(format_output(translated))
+        end
+
+        def fetch_source_segments
+          log "Fetching transcript (#{@options[:source_lang]}) for: #{video_url}"
+          segments = fetcher.fetch(@options[:source_lang], prefer_auto: @options[:prefer_auto])
+          log "Found #{segments.size} segments"
+          segments
+        end
+
+        def load_reviewed_segments
           video_id = video_url
+          log "Loading reviewed transcript for: #{video_id}"
 
           review_manager = ReviewManager.new(video_id, review_options)
           segments = review_manager.load_reviewed_segments
-
-          log "Loading reviewed transcript for: #{video_id}"
           log "Found #{segments.size} segments"
+          segments
+        end
 
+        def translate_with_logging(segments)
           log_translation_method
           translated = translator.translate_segments(segments)
+          log 'Translation complete!' unless translate_reviewed?
+          translated
+        end
 
-          output = format_output(translated)
-          write_output(output)
+        def save_review_files(segments, translated)
+          review_manager = build_review_manager
+          review_file = review_manager.save_for_review(segments, translated)
+          log_review_files(review_manager, review_file)
         end
 
         def build_review_manager

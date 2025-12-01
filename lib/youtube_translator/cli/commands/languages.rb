@@ -11,13 +11,10 @@ module YouTubeTranslator
 
         def run
           languages = fetcher.available_languages
+          return log('No captions available for this video') if languages.empty?
 
-          if languages.empty?
-            log 'No captions available for this video'
-          else
-            log 'Available languages:'
-            languages.each { |lang| log format_language(lang) }
-          end
+          log 'Available languages:'
+          languages.each { |lang| log format_language(lang) }
         end
 
         private

@@ -22,15 +22,15 @@ module YouTubeTranslator
       end
 
       def format_timestamp(seconds)
+        hours, minutes, secs = decompose_time(seconds)
+        hours.positive? ? format('%02d:%02d:%02d', hours, minutes, secs) : format('%02d:%02d', minutes, secs)
+      end
+
+      def decompose_time(seconds)
         hours = (seconds / 3600).to_i
         minutes = ((seconds % 3600) / 60).to_i
         secs = (seconds % 60).to_i
-
-        if hours.positive?
-          sprintf('%02d:%02d:%02d', hours, minutes, secs)
-        else
-          sprintf('%02d:%02d', minutes, secs)
-        end
+        [hours, minutes, secs]
       end
     end
   end

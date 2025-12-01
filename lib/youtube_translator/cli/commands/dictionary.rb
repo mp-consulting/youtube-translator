@@ -53,12 +53,10 @@ module YouTubeTranslator
         end
 
         def run_list
-          if dictionary.empty?
-            log "No translations in dictionary for #{lang_pair}"
-          else
-            log "Translations (#{lang_pair}):"
-            dictionary.all.each { |source, target| log "  #{source} -> #{target}" }
-          end
+          return log("No translations in dictionary for #{lang_pair}") if dictionary.empty?
+
+          log "Translations (#{lang_pair}):"
+          dictionary.all.each { |source, target| log "  #{source} -> #{target}" }
         end
 
         def run_import

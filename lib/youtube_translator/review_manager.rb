@@ -129,10 +129,22 @@ module YouTubeTranslator
 
     def parse_review_file
       content = File.read(review_file_path, encoding: 'UTF-8')
-      lines = content.lines.reject { |l| l.start_with?('#') || l.strip.empty? }
+      extract_translated_lines(content)
+    end
 
-      lines.map { |l| l.sub(/^\[\d{2}:\d{2}(?::\d{2})?\]\s*/, '').strip }
-           .reject(&:empty?)
+    def extract_translated_lines(content)
+      content.lines
+             .reject { |line| comment_or_empty?(line) }
+             .map { |line| strip_timestamp(line) }
+             .reject(&:empty?)
+    end
+
+    def comment_or_empty?(line)
+      line.start_with?('#') || line.strip.empty?
+    end
+
+    def strip_timestamp(line)
+      line.sub(/^\[\d{2}:\d{2}(?::\d{2})?\]\s*/, '').strip
     end
 
     def merge_reviewed_texts(segments, reviewed_texts)

@@ -22,11 +22,7 @@ module YouTubeTranslator
 
       def run
         @parser.parse
-
-        if command.nil?
-          show_help
-          exit 1
-        end
+        return show_help_and_exit unless command
 
         execute_command
       rescue Error => e
@@ -50,13 +46,14 @@ module YouTubeTranslator
 
       def execute_command
         handler = COMMANDS[command]
-
-        if handler.nil?
-          puts "Unknown command: #{command}. Use --help for usage information."
-          exit 1
-        end
+        return unknown_command_error unless handler
 
         build_command(handler).execute
+      end
+
+      def unknown_command_error
+        puts "Unknown command: #{command}. Use --help for usage information."
+        exit 1
       end
 
       def build_command(handler)
@@ -67,8 +64,9 @@ module YouTubeTranslator
         end
       end
 
-      def show_help
+      def show_help_and_exit
         puts 'No command specified. Use --help for usage information.'
+        exit 1
       end
     end
   end

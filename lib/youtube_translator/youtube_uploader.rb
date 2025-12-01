@@ -112,18 +112,19 @@ module YouTubeTranslator
       state = SecureRandom.hex(16)
       auth_url = build_auth_url(state)
 
+      display_auth_prompt(auth_url)
+      open_browser(auth_url)
+
+      code = wait_for_auth_callback(state)
+      exchange_code_for_tokens(code)
+    end
+
+    def display_auth_prompt(auth_url)
       puts "\n=== YouTube Authorization Required ==="
-      puts "Opening browser for authorization..."
+      puts 'Opening browser for authorization...'
       puts "If browser doesn't open, visit this URL:\n\n"
       puts auth_url
       puts "\n"
-
-      # Try to open browser
-      open_browser(auth_url)
-
-      # Start local server to receive callback
-      code = wait_for_auth_callback(state)
-      exchange_code_for_tokens(code)
     end
 
     def build_auth_url(state)
@@ -334,37 +335,38 @@ module YouTubeTranslator
     end
 
     def build_multipart_body(boundary, metadata, content)
-      body = []
-      body << "--#{boundary}"
-      body << 'Content-Type: application/json; charset=UTF-8'
-      body << ''
-      body << JSON.generate(metadata)
-      body << "--#{boundary}"
-      body << 'Content-Type: text/plain; charset=UTF-8'
-      body << ''
-      body << content
-      body << "--#{boundary}--"
-      body.join("\r\n")
+      [
+        "--#{boundary}",
+        'Content-Type: application/json; charset=UTF-8',
+        '',
+        ::JSON.generate(metadata),
+        "--#{boundary}",
+        'Content-Type: text/plain; charset=UTF-8',
+        '',
+        content,
+        "--#{boundary}--"
+      ].join("\r\n")
     end
 
     def authenticated_get(uri)
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Get.new(uri)
-      request['Authorization'] = "Bearer #{@access_token}"
-
-      http.request(request)
+      execute_authenticated_request(Net::HTTP::Get, uri)
     end
 
     def authenticated_delete(uri)
+      execute_authenticated_request(Net::HTTP::Delete, uri)
+    end
+
+    def execute_authenticated_request(request_class, uri)
+      http = build_https_client(uri)
+      request = request_class.new(uri)
+      request['Authorization'] = "Bearer #{@access_token}"
+      http.request(request)
+    end
+
+    def build_https_client(uri)
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
-
-      request = Net::HTTP::Delete.new(uri)
-      request['Authorization'] = "Bearer #{@access_token}"
-
-      http.request(request)
+      http
     end
 
     def handle_api_response(response)

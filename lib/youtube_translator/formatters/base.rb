@@ -16,27 +16,35 @@ module YouTubeTranslator
       protected
 
       def text_for(segment)
+        extract_text(segment) || segment.to_s
+      end
+
+      def start_time(segment)
+        segment_value(segment, :start)
+      end
+
+      def duration(segment)
+        segment_value(segment, :duration)
+      end
+
+      def end_time(segment)
+        start_time(segment) + duration(segment)
+      end
+
+      private
+
+      def extract_text(segment)
         if segment.respond_to?(:translated_text) && segment.translated_text
           segment.translated_text
         elsif segment.respond_to?(:text)
           segment.text
         elsif segment.is_a?(Hash)
           segment[:translated_text] || segment[:text]
-        else
-          segment.to_s
         end
       end
 
-      def start_time(segment)
-        segment.respond_to?(:start) ? segment.start : segment[:start]
-      end
-
-      def duration(segment)
-        segment.respond_to?(:duration) ? segment.duration : segment[:duration]
-      end
-
-      def end_time(segment)
-        start_time(segment) + duration(segment)
+      def segment_value(segment, attr)
+        segment.respond_to?(attr) ? segment.public_send(attr) : segment[attr]
       end
     end
   end

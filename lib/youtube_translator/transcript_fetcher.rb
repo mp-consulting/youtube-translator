@@ -262,25 +262,35 @@ module YouTubeTranslator
     end
 
     def find_transcript_url(captions, lang_code, prefer_auto: false)
-      track = if lang_code
-                # If language specified, try to find exact match
-                # If prefer_auto, look for auto-generated version first
-                if prefer_auto
-                  captions.find { |t| t['languageCode'] == lang_code && t['kind'] == 'asr' } ||
-                    captions.find { |t| t['languageCode'] == lang_code }
-                else
-                  captions.find { |t| t['languageCode'] == lang_code && t['kind'] != 'asr' } ||
-                    captions.find { |t| t['languageCode'] == lang_code }
-                end
-              elsif prefer_auto
-                # Prefer auto-generated if available
-                captions.find { |t| t['kind'] == 'asr' } || captions.first
-              else
-                # Prefer manual captions
-                captions.find { |t| t['kind'] != 'asr' } || captions.first
-              end
-
+      track = find_caption_track(captions, lang_code, prefer_auto)
       track&.dig('baseUrl')
+    end
+
+    def find_caption_track(captions, lang_code, prefer_auto)
+      return find_by_language(captions, lang_code, prefer_auto) if lang_code
+
+      find_by_preference(captions, prefer_auto)
+    end
+
+    def find_by_language(captions, lang_code, prefer_auto)
+      preferred_kind = prefer_auto ? 'asr' : nil
+
+      find_track_with_kind(captions, lang_code, preferred_kind) ||
+        captions.find { |t| t['languageCode'] == lang_code }
+    end
+
+    def find_track_with_kind(captions, lang_code, kind)
+      return nil unless kind
+
+      captions.find { |t| t['languageCode'] == lang_code && t['kind'] == kind }
+    end
+
+    def find_by_preference(captions, prefer_auto)
+      if prefer_auto
+        captions.find { |t| t['kind'] == 'asr' } || captions.first
+      else
+        captions.find { |t| t['kind'] != 'asr' } || captions.first
+      end
     end
 
     def fetch_transcript(url)

@@ -76,28 +76,30 @@ module YouTubeTranslator
       env_file = File.join(Dir.pwd, '.env')
       return unless File.exist?(env_file)
 
-      File.readlines(env_file).each do |line|
-        parse_env_line(line.strip)
-      end
+      File.readlines(env_file, chomp: true).each { |line| parse_env_line(line) }
     end
 
     def parse_env_line(line)
       return if line.empty? || line.start_with?('#')
 
-      match = line.match(/\A([A-Za-z_][A-Za-z0-9_]*)=(.*)\z/)
-      return unless match
+      key, value = extract_env_pair(line)
+      ENV[key] ||= strip_quotes(value) if key
+    end
 
-      key, value = match.captures
-      ENV[key] ||= strip_quotes(value.strip)
+    def extract_env_pair(line)
+      match = line.match(/\A([A-Za-z_][A-Za-z0-9_]*)=(.*)\z/)
+      match&.captures&.tap { |_, v| v.strip! }
     end
 
     def strip_quotes(value)
-      if (value.start_with?('"') && value.end_with?('"')) ||
-         (value.start_with?("'") && value.end_with?("'"))
-        value[1..-2]
-      else
-        value
-      end
+      return value[1..-2] if quoted?(value)
+
+      value
+    end
+
+    def quoted?(value)
+      (value.start_with?('"') && value.end_with?('"')) ||
+        (value.start_with?("'") && value.end_with?("'"))
     end
   end
 end

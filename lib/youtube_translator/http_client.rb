@@ -54,11 +54,7 @@ module YouTubeTranslator
       http.use_ssl = uri.scheme == 'https'
       http.open_timeout = @open_timeout
       http.read_timeout = @read_timeout
-
-      unless @verify_ssl
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end
-
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless @verify_ssl
       http
     end
 
