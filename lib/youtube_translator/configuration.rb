@@ -7,9 +7,6 @@ module YouTubeTranslator
   # Manages application configuration with support for .env files
   # Single Responsibility: Configuration loading and access
   class Configuration
-    CONFIG_DIR = File.join(Dir.home, '.youtube_translator')
-    CONFIG_FILE = File.join(CONFIG_DIR, 'config.json')
-
     # Directory paths relative to APP_ROOT
     REVIEWS_DIR = 'reviews'
     TRANSCRIPTS_DIR = 'transcripts'
@@ -36,7 +33,11 @@ module YouTubeTranslator
     end
 
     def config_dir
-      CONFIG_DIR
+      File.join(YouTubeTranslator::APP_ROOT, CONFIG_SUBDIR)
+    end
+
+    def config_file
+      File.join(config_dir, 'config.json')
     end
 
     def reviews_dir
@@ -52,10 +53,10 @@ module YouTubeTranslator
     end
 
     def save_openai_api_key(key)
-      FileUtils.mkdir_p(CONFIG_DIR)
+      FileUtils.mkdir_p(config_dir)
       config = load_json_config
       config['openai_api_key'] = key
-      File.write(CONFIG_FILE, JSON.pretty_generate(config))
+      File.write(config_file, JSON.pretty_generate(config))
     end
 
     private
@@ -83,9 +84,9 @@ module YouTubeTranslator
     end
 
     def load_json_config
-      return {} unless File.exist?(CONFIG_FILE)
+      return {} unless File.exist?(config_file)
 
-      JSON.parse(File.read(CONFIG_FILE))
+      JSON.parse(File.read(config_file))
     rescue JSON::ParserError
       {}
     end

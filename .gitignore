@@ -46,4 +46,5 @@ Gemfile.lock
 /translations/*
 /transcripts/*
 
-config/youtube_tokens.json
+config/*
+!config/languages.yml
