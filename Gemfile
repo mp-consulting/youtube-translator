@@ -10,3 +10,6 @@ gem 'ostruct'
 # SSL/HTTP
 gem 'net-http'
 gem 'openssl'
+
+# OAuth callback server
+gem 'webrick'

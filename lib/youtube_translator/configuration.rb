@@ -19,13 +19,18 @@ module YouTubeTranslator
     }.freeze
 
     attr_accessor :source_lang, :target_lang, :llm_provider, :llm_model,
-                  :openai_api_key, :anthropic_api_key, :innertube_api_key
+                  :openai_api_key, :anthropic_api_key, :innertube_api_key,
+                  :google_client_id, :google_client_secret
 
     def initialize
       load_dotenv
       apply_defaults
       load_config_file
       apply_environment
+    end
+
+    def config_dir
+      CONFIG_DIR
     end
 
     def save_openai_api_key(key)
@@ -55,6 +60,8 @@ module YouTubeTranslator
       @openai_api_key = ENV.fetch('OPENAI_API_KEY', @openai_api_key)
       @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', @anthropic_api_key)
       @innertube_api_key = ENV.fetch('INNERTUBE_API_KEY', @innertube_api_key)
+      @google_client_id = ENV.fetch('GOOGLE_CLIENT_ID', @google_client_id)
+      @google_client_secret = ENV.fetch('GOOGLE_CLIENT_SECRET', @google_client_secret)
     end
 
     def load_json_config

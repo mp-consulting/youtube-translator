@@ -11,6 +11,7 @@ module YouTubeTranslator
         'translate' => Commands::Translate,
         'review' => Commands::Review,
         'translate-reviewed' => :translate_reviewed,
+        'upload' => Commands::Upload,
         'languages' => Commands::Languages,
         'dict' => Commands::Dictionary
       }.freeze

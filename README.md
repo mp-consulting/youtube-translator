@@ -1,21 +1,25 @@
 # YouTube Translator
 
-A Ruby CLI tool to fetch YouTube video transcripts and translate them using OpenAI or Anthropic LLMs.
+A Ruby CLI tool to fetch YouTube video transcripts, translate them using OpenAI or Anthropic LLMs, and upload captions back to YouTube.
 
 ## Features
 
 - 🎬 **Fetch transcripts** from any YouTube video with captions
 - 🌍 **Translate** using OpenAI (GPT-4o, GPT-4o-mini) or Anthropic (Claude)
+- 📤 **Upload captions** back to YouTube via the YouTube Data API
 - 📝 **Multiple formats**: Text, SRT, VTT, JSON
 - 📖 **Custom dictionary** for consistent terminology
 - 👀 **Review mode** to edit translations before finalizing
 - 🔄 **Auto-generated captions** support with `--auto` flag
+- 🔧 **yt-dlp fallback** for videos requiring authentication
 
 ## Requirements
 
 - Ruby 3.0+
 - Bundler
 - OpenAI or Anthropic API key
+- yt-dlp (optional, for videos requiring YouTube login)
+- Google OAuth credentials (optional, for uploading captions)
 
 ## Installation
 
@@ -50,6 +54,58 @@ ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
 # Default languages
 SOURCE_LANG=en
 TARGET_LANG=fr
+
+# Google OAuth (optional, for uploading captions to YouTube)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
+
+### Setting up YouTube Upload (Optional)
+
+To upload captions to YouTube, you need Google OAuth 2.0 credentials:
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project (or select an existing one)
+3. Enable the **YouTube Data API v3**
+4. Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
+5. Select **Desktop application** as the application type
+6. Copy the Client ID and Client Secret to your `.env` file
+
+The first time you run `upload`, a browser will open for authorization.
+
+## Quick Example
+
+Here's a complete workflow to translate a YouTube video and upload captions:
+
+```bash
+# 1. Check available languages for a video
+./bin/yt-translator languages https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+# 2. Fetch the English transcript
+./bin/yt-translator fetch dQw4w9WgXcQ -s en
+# Output:
+# [00:00] We're no strangers to love
+# [00:03] You know the rules and so do I
+# ...
+
+# 3. Translate to French with review mode
+./bin/yt-translator review dQw4w9WgXcQ -s en -t fr --anthropic
+# Creates files in reviews/anthropic/dQw4w9WgXcQ/
+# Edit translated_fr.txt to fix any translation issues
+
+# 4. Upload the translated captions to YouTube
+./bin/yt-translator upload dQw4w9WgXcQ fr
+# ✓ Caption uploaded successfully!
+#   Caption ID: abc123
+#   Language: fr
+#   Name: French (YouTube Translator)
+```
+
+Or for a quick translation without review:
+
+```bash
+# Translate and output as SRT subtitles
+./bin/yt-translator translate dQw4w9WgXcQ -s en -t es -f srt -o spanish.srt
 ```
 
 ## Usage
@@ -126,12 +182,32 @@ Review and edit translations before finalizing:
 # Create review files
 ./bin/yt-translator review VIDEO_ID -t fr
 
-# Files are saved in reviews/<provider>/
-#   - VIDEO_ID_<provider>_original.txt
-#   - VIDEO_ID_<provider>_translated_fr.txt
-#   - VIDEO_ID_<provider>_review.txt (edit this)
-#   - VIDEO_ID_<provider>_segments.json
+# Files are saved in reviews/<provider>/<video_id>/
+#   - original.txt
+#   - translated_fr.txt
+#   - review.txt (edit this)
+#   - segments.json
 ```
+
+### Upload Captions to YouTube
+
+Upload translated captions back to YouTube:
+
+```bash
+# Upload a caption file
+./bin/yt-translator upload VIDEO_ID translated_fr.txt -t fr
+
+# Upload from review folder (auto-detects file)
+./bin/yt-translator upload VIDEO_ID fr
+
+# Upload as draft (not published)
+./bin/yt-translator upload VIDEO_ID fr --draft
+
+# Custom caption name
+./bin/yt-translator upload VIDEO_ID fr --caption-name "French Subtitles"
+```
+
+**Note**: You must be the owner of the YouTube video to upload captions.
 
 ### Dictionary
 
@@ -170,6 +246,8 @@ Dictionary terms are automatically included in LLM prompts for consistent transl
 | `--model MODEL` | LLM model to use |
 | `--api-key KEY` | API key (overrides .env) |
 | `--no-ssl-verify` | Disable SSL verification |
+| `--draft` | Upload caption as draft (not published) |
+| `--caption-name NAME` | Name for uploaded caption |
 | `-h, --help` | Show help |
 | `-v, --version` | Show version |
 
@@ -182,6 +260,7 @@ Dictionary terms are automatically included in LLM prompts for consistent transl
 | `translate <url>` | Fetch and translate |
 | `review <url>` | Save for review |
 | `translate-reviewed <id>` | Translate reviewed file |
+| `upload <id> <file\|lang>` | Upload caption to YouTube |
 | `languages <url>` | List available languages |
 | `dict add <word> <trans>` | Add dictionary term |
 | `dict remove <word>` | Remove dictionary term |
@@ -206,6 +285,7 @@ youtube-translator/
 │       ├── configuration.rb
 │       ├── dictionary.rb
 │       ├── transcript_fetcher.rb
+│       ├── youtube_uploader.rb  # YouTube API upload
 │       └── ...
 ├── reviews/                 # Review files by provider
 ├── transcripts/             # Downloaded transcripts by video ID
@@ -221,6 +301,20 @@ youtube-translator/
 
 The video doesn't have captions enabled. Try `--auto` for auto-generated captions.
 
+### LOGIN_REQUIRED error
+
+Some videos require YouTube login. Install `yt-dlp` for automatic fallback:
+
+```bash
+# macOS
+brew install yt-dlp
+
+# Linux
+pip install yt-dlp
+
+# The tool will automatically use yt-dlp when needed
+```
+
 ### SSL errors
 
 Behind a corporate proxy? Use `--no-ssl-verify`:
@@ -228,6 +322,12 @@ Behind a corporate proxy? Use `--no-ssl-verify`:
 ```bash
 ./bin/yt-translator fetch VIDEO_ID --no-ssl-verify
 ```
+
+### Upload fails
+
+- Make sure you own the video you're trying to upload captions to
+- Check that YouTube Data API v3 is enabled in your Google Cloud project
+- Re-authenticate by deleting `~/.youtube_translator/youtube_tokens.json`
 
 ## License
 

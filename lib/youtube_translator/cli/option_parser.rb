@@ -75,6 +75,7 @@ module YouTubeTranslator
             translate <video_url>   Fetch and translate transcript
             review <video_url>      Fetch transcript and save for local review
             translate-reviewed <id> Translate a reviewed transcript
+            upload <video_id> <file|lang>  Upload caption to YouTube
             languages <video_url>   List available languages for video
             dict <subcommand>       Manage translation dictionary
 
@@ -151,6 +152,14 @@ module YouTubeTranslator
       def configure_general_options(opts)
         opts.on('--no-ssl-verify', 'Disable SSL certificate verification') do
           @options[:no_ssl_verify] = true
+        end
+
+        opts.on('--draft', 'Upload caption as draft (not published)') do
+          @options[:draft] = true
+        end
+
+        opts.on('--caption-name NAME', 'Name for the uploaded caption') do |n|
+          @options[:caption_name] = n
         end
 
         opts.on('-h', '--help', 'Show this help message') do
