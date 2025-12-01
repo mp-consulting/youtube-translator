@@ -1,13 +1,11 @@
 {
   "name": "YouTube Translator",
-  "image": "mcr.microsoft.com/devcontainers/ruby:3.3",
+  "image": "mcr.microsoft.com/devcontainers/ruby:3.4",
   "features": {},
   "customizations": {
     "vscode": {
       "extensions": [
-        "rebornix.Ruby",
-        "shopify.ruby-lsp",
-        "castwide.solargraph"
+        "shopify.ruby-lsp"
       ],
       "settings": {
         "editor.formatOnSave": true,

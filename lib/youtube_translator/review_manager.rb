@@ -48,23 +48,23 @@ module YouTubeTranslator
     end
 
     def review_dir
-      File.join(Dir.pwd, REVIEW_DIR, @provider)
+      File.join(Dir.pwd, REVIEW_DIR, @provider, @video_id)
     end
 
     def original_file_path
-      File.join(review_dir, "#{@video_id}_#{@provider}_original.txt")
+      File.join(review_dir, 'original.txt')
     end
 
     def translated_file_path
-      File.join(review_dir, "#{@video_id}_#{@provider}_translated_#{@target_lang}.txt")
+      File.join(review_dir, "translated_#{@target_lang}.txt")
     end
 
     def segments_json_path
-      File.join(review_dir, "#{@video_id}_#{@provider}_segments.json")
+      File.join(review_dir, 'segments.json')
     end
 
     def review_file_path
-      File.join(review_dir, "#{@video_id}_#{@provider}_review.txt")
+      File.join(review_dir, 'review.txt')
     end
 
     def save_original(segments)
