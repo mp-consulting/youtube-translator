@@ -10,6 +10,12 @@ module YouTubeTranslator
     CONFIG_DIR = File.join(Dir.home, '.youtube_translator')
     CONFIG_FILE = File.join(CONFIG_DIR, 'config.json')
 
+    # Directory paths relative to APP_ROOT
+    REVIEWS_DIR = 'reviews'
+    TRANSCRIPTS_DIR = 'transcripts'
+    TRANSLATIONS_DIR = 'translations'
+    CONFIG_SUBDIR = 'config'
+
     DEFAULTS = {
       source_lang: 'en',
       target_lang: 'fr',
@@ -31,6 +37,18 @@ module YouTubeTranslator
 
     def config_dir
       CONFIG_DIR
+    end
+
+    def reviews_dir
+      File.join(YouTubeTranslator::APP_ROOT, REVIEWS_DIR)
+    end
+
+    def transcripts_dir
+      File.join(YouTubeTranslator::APP_ROOT, TRANSCRIPTS_DIR)
+    end
+
+    def translations_dir
+      File.join(YouTubeTranslator::APP_ROOT, TRANSLATIONS_DIR)
     end
 
     def save_openai_api_key(key)

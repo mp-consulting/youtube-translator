@@ -7,8 +7,6 @@ module YouTubeTranslator
   # Manages transcript review workflow
   # Single Responsibility: Review file creation and parsing
   class ReviewManager
-    REVIEW_DIR = 'reviews'
-
     def initialize(video_id, options = {})
       @video_id = video_id
       @source_lang = options[:source_lang] || 'en'
@@ -48,7 +46,7 @@ module YouTubeTranslator
     end
 
     def review_dir
-      File.join(Dir.pwd, REVIEW_DIR, @provider, @video_id)
+      File.join(YouTubeTranslator.configuration.reviews_dir, @provider, @video_id)
     end
 
     def original_file_path
