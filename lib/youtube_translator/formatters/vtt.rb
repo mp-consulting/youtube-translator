@@ -21,7 +21,7 @@ module YouTubeTranslator
 
       def format_timestamp(seconds)
         hours, minutes, secs, millis = decompose_time_with_millis(seconds)
-        format('%02d:%02d:%02d.%03d', hours, minutes, secs, millis)
+        Kernel.format('%02d:%02d:%02d.%03d', hours, minutes, secs, millis)
       end
 
       def decompose_time_with_millis(seconds)

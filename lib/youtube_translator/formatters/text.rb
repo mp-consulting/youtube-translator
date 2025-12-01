@@ -23,7 +23,9 @@ module YouTubeTranslator
 
       def format_timestamp(seconds)
         hours, minutes, secs = decompose_time(seconds)
-        hours.positive? ? format('%02d:%02d:%02d', hours, minutes, secs) : format('%02d:%02d', minutes, secs)
+        template = hours.positive? ? '%02d:%02d:%02d' : '%02d:%02d'
+        args = hours.positive? ? [hours, minutes, secs] : [minutes, secs]
+        Kernel.format(template, *args)
       end
 
       def decompose_time(seconds)
