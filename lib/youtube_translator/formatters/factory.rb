@@ -7,6 +7,7 @@ module YouTubeTranslator
     class Factory
       FORMATTERS = {
         text: 'Text',
+        txt: 'Text',
         srt: 'SRT',
         vtt: 'VTT',
         json: 'JSON'

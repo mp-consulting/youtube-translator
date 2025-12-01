@@ -71,6 +71,7 @@ module YouTubeTranslator
 
           Commands:
             fetch <video_url>       Fetch transcript from YouTube video
+            fetch-all <video_url>   Fetch all transcripts and save locally
             translate <video_url>   Fetch and translate transcript
             review <video_url>      Fetch transcript and save for local review
             translate-reviewed <id> Translate a reviewed transcript

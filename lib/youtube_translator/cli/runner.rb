@@ -7,6 +7,7 @@ module YouTubeTranslator
     class Runner
       COMMANDS = {
         'fetch' => Commands::Fetch,
+        'fetch-all' => Commands::FetchAll,
         'translate' => Commands::Translate,
         'review' => Commands::Review,
         'translate-reviewed' => :translate_reviewed,

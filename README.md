@@ -79,6 +79,23 @@ TARGET_LANG=fr
 ./bin/yt-translator languages VIDEO_ID
 ```
 
+### Fetch All Transcripts
+
+Download all available transcripts (all languages + auto-generated) to local files:
+
+```bash
+# Save all transcripts as text files
+./bin/yt-translator fetch-all VIDEO_ID
+
+# Save as SRT subtitles
+./bin/yt-translator fetch-all VIDEO_ID -f srt
+
+# Files are saved in transcripts/<video_id>/
+#   - en.txt (manual English)
+#   - en_auto.txt (auto-generated English)
+#   - fr.txt, de.txt, etc.
+```
+
 ### Translate
 
 ```bash
@@ -161,6 +178,7 @@ Dictionary terms are automatically included in LLM prompts for consistent transl
 | Command | Description |
 |---------|-------------|
 | `fetch <url>` | Fetch transcript |
+| `fetch-all <url>` | Fetch all transcripts to local files |
 | `translate <url>` | Fetch and translate |
 | `review <url>` | Save for review |
 | `translate-reviewed <id>` | Translate reviewed file |
@@ -190,6 +208,7 @@ youtube-translator/
 │       ├── transcript_fetcher.rb
 │       └── ...
 ├── reviews/                 # Review files by provider
+├── transcripts/             # Downloaded transcripts by video ID
 ├── translations/            # Dictionary files
 ├── .env.example
 ├── Gemfile

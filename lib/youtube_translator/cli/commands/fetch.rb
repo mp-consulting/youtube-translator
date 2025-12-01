@@ -23,8 +23,7 @@ module YouTubeTranslator
         private
 
         def source_lang
-          lang = @options[:source_lang]
-          lang unless lang == 'en'
+          @options[:source_lang]
         end
 
         def lang_suffix

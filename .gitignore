@@ -44,3 +44,4 @@ Gemfile.lock
 # Project specific
 /reviews/*
 /translations/*
+/transcripts/*
