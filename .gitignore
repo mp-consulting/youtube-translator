@@ -45,3 +45,5 @@ Gemfile.lock
 /reviews/*
 /translations/*
 /transcripts/*
+
+config/youtube_tokens.json

@@ -12,7 +12,7 @@ module YouTubeTranslator
 
       attr_reader :access_token, :refresh_token, :expires_at
 
-      def initialize(config_dir)
+      def initialize(config_dir = nil)
         @config_dir = config_dir
         @access_token = nil
         @refresh_token = nil
@@ -20,7 +20,7 @@ module YouTubeTranslator
       end
 
       def tokens_file
-        File.join(@config_dir, 'youtube_tokens.json')
+        File.join(YouTubeTranslator::APP_ROOT, 'config', 'youtube_tokens.json')
       end
 
       def save(access_token:, refresh_token:, expires_at:)
@@ -70,7 +70,8 @@ module YouTubeTranslator
       private
 
       def write_to_file
-        FileUtils.mkdir_p(@config_dir)
+        config_dir = File.join(YouTubeTranslator::APP_ROOT, 'config')
+        FileUtils.mkdir_p(config_dir)
         data = {
           access_token: @access_token,
           refresh_token: @refresh_token,
