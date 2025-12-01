@@ -273,23 +273,52 @@ Dictionary terms are automatically included in LLM prompts for consistent transl
 ```
 youtube-translator/
 ├── bin/
-│   └── yt-translator        # CLI executable
+│   └── yt-translator           # CLI executable
+├── config/
+│   └── languages.yml           # Language code mappings
 ├── lib/
-│   ├── youtube_translator.rb
+│   ├── youtube_translator.rb   # Main module, Zeitwerk loader
 │   ├── prompts/
-│   │   └── translation.md   # LLM system prompt
+│   │   └── translation.md      # LLM system prompt
 │   └── youtube_translator/
-│       ├── cli/             # CLI commands
-│       ├── formatters/      # Output formatters
-│       ├── translators/     # LLM integrations
+│       ├── cli/
+│       │   ├── commands/       # CLI command implementations
+│       │   │   ├── base.rb
+│       │   │   ├── dictionary.rb
+│       │   │   ├── fetch.rb
+│       │   │   ├── fetch_all.rb
+│       │   │   ├── languages.rb
+│       │   │   ├── review.rb
+│       │   │   ├── translate.rb
+│       │   │   └── upload.rb
+│       │   ├── option_parser.rb
+│       │   └── runner.rb
+│       ├── formatters/         # Output formatters
+│       │   ├── factory.rb
+│       │   ├── json.rb
+│       │   ├── srt.rb
+│       │   ├── text.rb
+│       │   └── vtt.rb
+│       ├── oauth/              # Google OAuth handling
+│       │   ├── google_authenticator.rb
+│       │   └── token_store.rb
+│       ├── translators/        # LLM integrations
+│       │   ├── anthropic.rb
+│       │   ├── chatgpt.rb
+│       │   ├── factory.rb
+│       │   ├── llm_translator.rb
+│       │   └── local.rb
 │       ├── configuration.rb
 │       ├── dictionary.rb
+│       ├── http_client.rb
+│       ├── review_manager.rb
 │       ├── transcript_fetcher.rb
-│       ├── youtube_uploader.rb  # YouTube API upload
-│       └── ...
-├── reviews/                 # Review files by provider
-├── transcripts/             # Downloaded transcripts by video ID
-├── translations/            # Dictionary files
+│       ├── transcript_parser.rb
+│       ├── video_id_extractor.rb
+│       └── youtube_uploader.rb
+├── reviews/                    # Review files by provider
+├── transcripts/                # Downloaded transcripts by video ID
+├── translations/               # Dictionary files
 ├── .env.example
 ├── Gemfile
 └── README.md
