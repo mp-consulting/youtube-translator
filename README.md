@@ -79,7 +79,9 @@ Here's a complete workflow to translate a YouTube video and upload captions:
 
 ```bash
 # 1. Check available languages for a video
-./bin/yt-translator languages https://www.youtube.com/watch?v=dQw4w9WgXcQ
+./bin/yt-translator languages "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+# Or just use the video ID:
+./bin/yt-translator languages dQw4w9WgXcQ
 
 # 2. Fetch the English transcript
 ./bin/yt-translator fetch dQw4w9WgXcQ -s en

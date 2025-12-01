@@ -17,8 +17,7 @@ module YouTubeTranslator
       source_lang: 'en',
       target_lang: 'fr',
       llm_provider: 'openai',
-      llm_model: 'gpt-4o-mini',
-      innertube_api_key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
+      llm_model: 'gpt-4o-mini'
     }.freeze
 
     attr_accessor :source_lang, :target_lang, :llm_provider, :llm_model,
