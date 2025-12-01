@@ -126,20 +126,24 @@ module YouTubeTranslator
     end
 
     def build_insert_metadata(video_id, language, name, draft)
-      {
-        snippet: {
-          videoId: video_id,
-          language: language,
-          name: name,
-          isDraft: draft
-        }
+      snippet = {
+        videoId: video_id,
+        language: language,
+        name: name
       }
+      # Only include isDraft if explicitly set (not nil)
+      snippet[:isDraft] = draft unless draft.nil?
+
+      { snippet: snippet }
     end
 
     def build_update_metadata(caption_id, name, draft)
-      metadata = { id: caption_id, snippet: { isDraft: draft } }
-      metadata[:snippet][:name] = name if name
-      metadata
+      snippet = {}
+      snippet[:name] = name if name
+      # Only include isDraft if explicitly set (not nil)
+      snippet[:isDraft] = draft unless draft.nil?
+
+      { id: caption_id, snippet: snippet }
     end
 
     def upload_caption_content(caption_id, metadata, content)
@@ -147,13 +151,14 @@ module YouTubeTranslator
       boundary = generate_boundary
       body = build_multipart_body(boundary, metadata, content)
 
-      response = execute_upload_request(uri, boundary, body)
+      # Use PUT for updates, POST for inserts
+      response = execute_upload_request(uri, boundary, body, update: !caption_id.nil?)
       handle_api_response(response)
     end
 
     def build_upload_uri(caption_id)
       uri = URI(YOUTUBE_UPLOAD_URL)
-      params = { part: 'snippet', uploadType: 'multipart' }
+      params = { part: 'snippet', uploadType: 'multipart', sync: false }
       params[:id] = caption_id if caption_id
       uri.query = URI.encode_www_form(params)
       uri
@@ -164,22 +169,26 @@ module YouTubeTranslator
     end
 
     def build_multipart_body(boundary, metadata, content)
+      # Normalize content line endings to CRLF for multipart compliance
+      normalized_content = content.gsub(/\r?\n/, "\r\n")
+
       [
         "--#{boundary}",
         'Content-Type: application/json; charset=UTF-8',
         '',
         ::JSON.generate(metadata),
         "--#{boundary}",
-        'Content-Type: text/plain; charset=UTF-8',
+        'Content-Type: application/x-subrip; charset=UTF-8',
         '',
-        content,
+        normalized_content,
         "--#{boundary}--"
       ].join("\r\n")
     end
 
-    def execute_upload_request(uri, boundary, body)
+    def execute_upload_request(uri, boundary, body, update: false)
       http = build_https_client(uri)
-      request = Net::HTTP::Post.new(uri)
+      request_class = update ? Net::HTTP::Put : Net::HTTP::Post
+      request = request_class.new(uri)
       request['Authorization'] = authorization_header
       request['Content-Type'] = "multipart/related; boundary=#{boundary}"
       request.body = body

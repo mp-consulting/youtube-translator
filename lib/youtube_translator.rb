@@ -5,6 +5,8 @@ require 'zeitwerk'
 
 # YouTube Transcript Fetcher and Translator
 module YouTubeTranslator
+  APP_ROOT = File.expand_path('..', __dir__)
+
   class Error < StandardError; end
   class VideoNotFoundError < Error; end
   class NoCaptionsError < Error; end
@@ -21,7 +23,8 @@ module YouTubeTranslator
           'chatgpt' => 'ChatGPT',
           'json' => 'JSON',
           'srt' => 'SRT',
-          'vtt' => 'VTT'
+          'vtt' => 'VTT',
+          'oauth' => 'OAuth'
         )
         loader
       end

@@ -1,0 +1,114 @@
+# ISO 639-1 language codes supported by YouTube
+# Format: code: Name
+
+# Major languages
+en: English
+es: Spanish
+fr: French
+de: German
+it: Italian
+pt: Portuguese
+ru: Russian
+ja: Japanese
+ko: Korean
+zh: Chinese
+ar: Arabic
+hi: Hindi
+
+# European languages
+nl: Dutch
+pl: Polish
+cs: Czech
+sk: Slovak
+hu: Hungarian
+ro: Romanian
+bg: Bulgarian
+hr: Croatian
+sr: Serbian
+sl: Slovenian
+uk: Ukrainian
+el: Greek
+tr: Turkish
+lt: Lithuanian
+lv: Latvian
+et: Estonian
+fi: Finnish
+sv: Swedish
+da: Danish
+"no": Norwegian  # quoted because 'no' is a YAML boolean
+is: Icelandic
+ga: Irish
+cy: Welsh
+mt: Maltese
+sq: Albanian
+mk: Macedonian
+bs: Bosnian
+be: Belarusian
+ka: Georgian
+hy: Armenian
+az: Azerbaijani
+kk: Kazakh
+uz: Uzbek
+
+# Asian languages
+th: Thai
+vi: Vietnamese
+id: Indonesian
+ms: Malay
+tl: Filipino
+my: Burmese
+km: Khmer
+lo: Lao
+bn: Bengali
+ta: Tamil
+te: Telugu
+ml: Malayalam
+kn: Kannada
+mr: Marathi
+gu: Gujarati
+pa: Punjabi
+ne: Nepali
+si: Sinhala
+ur: Urdu
+fa: Persian
+ps: Pashto
+mn: Mongolian
+
+# African languages
+sw: Swahili
+am: Amharic
+yo: Yoruba
+ig: Igbo
+zu: Zulu
+xh: Xhosa
+af: Afrikaans
+ha: Hausa
+so: Somali
+
+# Other languages
+he: Hebrew
+yi: Yiddish
+la: Latin
+eo: Esperanto
+eu: Basque
+ca: Catalan
+gl: Galician
+
+# Regional variants
+pt-BR: Portuguese (Brazil)
+pt-PT: Portuguese (Portugal)
+zh-Hans: Chinese (Simplified)
+zh-Hant: Chinese (Traditional)
+zh-CN: Chinese (China)
+zh-TW: Chinese (Taiwan)
+en-US: English (US)
+en-GB: English (UK)
+es-ES: Spanish (Spain)
+es-MX: Spanish (Mexico)
+es-419: Spanish (Latin America)
+fr-FR: French (France)
+fr-CA: French (Canada)
+de-DE: German (Germany)
+de-AT: German (Austria)
+nl-NL: Dutch (Netherlands)
+nl-BE: Dutch (Belgium)
