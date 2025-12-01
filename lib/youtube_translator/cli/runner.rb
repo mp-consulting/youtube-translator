@@ -1,0 +1,73 @@
+# frozen_string_literal: true
+
+module YouTubeTranslator
+  module CLI
+    # Main CLI runner - routes commands to handlers
+    # Single Responsibility: Command routing
+    class Runner
+      COMMANDS = {
+        'fetch' => Commands::Fetch,
+        'translate' => Commands::Translate,
+        'review' => Commands::Review,
+        'translate-reviewed' => :translate_reviewed,
+        'languages' => Commands::Languages,
+        'dict' => Commands::Dictionary
+      }.freeze
+
+      def initialize(args = ARGV)
+        @parser = OptionParser.new(args)
+      end
+
+      def run
+        @parser.parse
+
+        if command.nil?
+          show_help
+          exit 1
+        end
+
+        execute_command
+      rescue Error => e
+        puts "Error: #{e.message}"
+        exit 1
+      end
+
+      private
+
+      def command
+        @parser.command
+      end
+
+      def command_args
+        @parser.command_args
+      end
+
+      def options
+        @parser.options
+      end
+
+      def execute_command
+        handler = COMMANDS[command]
+
+        if handler.nil?
+          puts "Unknown command: #{command}. Use --help for usage information."
+          exit 1
+        end
+
+        build_command(handler).execute
+      end
+
+      def build_command(handler)
+        if handler == :translate_reviewed
+          Commands::Review.for_translate_reviewed(command_args, options)
+        else
+          handler.new(command_args, options)
+        end
+      end
+
+      def show_help
+        puts 'No command specified. Use --help for usage information.'
+      end
+    end
+  end
+end

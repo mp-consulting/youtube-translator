@@ -1,0 +1,23 @@
+{
+  "name": "YouTube Translator",
+  "image": "mcr.microsoft.com/devcontainers/ruby:3.3",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.Ruby",
+        "shopify.ruby-lsp",
+        "castwide.solargraph"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "[ruby]": {
+          "editor.defaultFormatter": "shopify.ruby-lsp"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "ruby --version",
+  "remoteUser": "vscode"
+}
