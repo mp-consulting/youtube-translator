@@ -12,7 +12,7 @@ module YouTubeTranslator
       DEFAULT_OPTIONS = {
         format: :text,
         timestamps: true,
-        use_chatgpt: false,
+        provider: nil,
         api_key: nil,
         model: nil
       }.freeze
@@ -48,9 +48,7 @@ module YouTubeTranslator
         config = YouTubeTranslator.configuration
         DEFAULT_OPTIONS.merge(
           source_lang: config.source_lang,
-          target_lang: config.target_lang,
-          model: config.openai_model,
-          use_chatgpt: ENV['USE_CHATGPT'] == 'true'
+          target_lang: config.target_lang
         )
       end
 
@@ -60,7 +58,7 @@ module YouTubeTranslator
           configure_format_options(opts)
           configure_language_options(opts)
           configure_output_options(opts)
-          configure_chatgpt_options(opts)
+          configure_translator_options(opts)
           configure_general_options(opts)
         end
       end
@@ -117,16 +115,24 @@ module YouTubeTranslator
         end
       end
 
-      def configure_chatgpt_options(opts)
-        opts.on('--chatgpt', 'Use ChatGPT API for translation') do
-          @options[:use_chatgpt] = true
+      def configure_translator_options(opts)
+        opts.on('--provider PROVIDER', %w[openai anthropic local], 'LLM provider (openai, anthropic, local)') do |p|
+          @options[:provider] = p
         end
 
-        opts.on('--api-key KEY', 'OpenAI API key') do |k|
+        opts.on('--openai', 'Use OpenAI for translation (shortcut for --provider openai)') do
+          @options[:provider] = 'openai'
+        end
+
+        opts.on('--anthropic', '--claude', 'Use Anthropic for translation (shortcut for --provider anthropic)') do
+          @options[:provider] = 'anthropic'
+        end
+
+        opts.on('--api-key KEY', 'API key for translation service') do |k|
           @options[:api_key] = k
         end
 
-        opts.on('--model MODEL', 'OpenAI model to use') do |m|
+        opts.on('--model MODEL', 'Model to use for translation') do |m|
           @options[:model] = m
         end
 

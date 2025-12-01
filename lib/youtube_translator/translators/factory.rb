@@ -16,8 +16,11 @@ module YouTubeTranslator
       end
 
       def build
-        if use_chatgpt?
-          ChatGPT.new(@source_lang, @target_lang, chatgpt_options)
+        case provider
+        when 'anthropic'
+          Anthropic.new(@source_lang, @target_lang, api_options)
+        when 'openai'
+          ChatGPT.new(@source_lang, @target_lang, api_options)
         else
           Local.new(@source_lang, @target_lang)
         end
@@ -25,14 +28,34 @@ module YouTubeTranslator
 
       private
 
-      def use_chatgpt?
-        @options[:use_chatgpt]
+      DEFAULT_MODELS = {
+        'openai' => 'gpt-4o-mini',
+        'anthropic' => 'claude-sonnet-4-5-20250929'
+      }.freeze
+
+      def provider
+        @options[:provider] || YouTubeTranslator.configuration.llm_provider
       end
 
-      def chatgpt_options
+      def model
+        # If model is explicitly provided, use it
+        return @options[:model] if @options[:model]
+
+        config = YouTubeTranslator.configuration
+
+        # If provider matches config, use config model
+        # Otherwise, use default model for the selected provider
+        if provider == config.llm_provider
+          config.llm_model
+        else
+          DEFAULT_MODELS[provider]
+        end
+      end
+
+      def api_options
         {
           api_key: @options[:api_key],
-          model: @options[:model]
+          model: model
         }
       end
     end

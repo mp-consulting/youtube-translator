@@ -54,8 +54,9 @@ module YouTubeTranslator
         'context' => {
           'client' => {
             'clientName' => 'WEB',
-            'clientVersion' => '2.20231121.08.00',
-            'hl' => 'en'
+            'clientVersion' => '2.20240530.02.00',
+            'hl' => 'en',
+            'gl' => 'US'
           }
         },
         'videoId' => @video_id

@@ -41,10 +41,25 @@ module YouTubeTranslator
           @translator ||= Translators::Factory.build(
             @options[:source_lang],
             @options[:target_lang],
-            use_chatgpt: @options[:use_chatgpt],
+            provider: @options[:provider],
             api_key: @options[:api_key],
             model: @options[:model]
           )
+        end
+
+        def effective_provider
+          @options[:provider] || YouTubeTranslator.configuration.llm_provider
+        end
+
+        def effective_model
+          return @options[:model] if @options[:model]
+
+          config = YouTubeTranslator.configuration
+          if effective_provider == config.llm_provider
+            config.llm_model
+          else
+            Translators::Factory::DEFAULT_MODELS[effective_provider]
+          end
         end
 
         def format_output(segments)

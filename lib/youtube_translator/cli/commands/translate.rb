@@ -17,7 +17,6 @@ module YouTubeTranslator
 
           log_translation_method
           translated = translator.translate_segments(segments)
-          log "\n" if @options[:use_chatgpt]
 
           output = format_output(translated)
           write_output(output)
@@ -26,12 +25,7 @@ module YouTubeTranslator
         private
 
         def log_translation_method
-          if @options[:use_chatgpt]
-            model = @options[:model] || YouTubeTranslator.configuration.openai_model
-            log "Translating with ChatGPT (#{model}) from #{@options[:source_lang]} to #{@options[:target_lang]}..."
-          else
-            log "Translating from #{@options[:source_lang]} to #{@options[:target_lang]}...\n\n"
-          end
+          log "Translating with #{effective_provider} (#{effective_model}) from #{@options[:source_lang]} to #{@options[:target_lang]}..."
         end
       end
     end

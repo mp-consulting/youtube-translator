@@ -13,6 +13,7 @@ module YouTubeTranslator
       @video_id = video_id
       @source_lang = options[:source_lang] || 'en'
       @target_lang = options[:target_lang] || 'fr'
+      @provider = options[:provider] || YouTubeTranslator.configuration.llm_provider
       @include_timestamps = options.fetch(:include_timestamps, true)
     end
 
@@ -47,23 +48,23 @@ module YouTubeTranslator
     end
 
     def review_dir
-      File.join(Dir.pwd, REVIEW_DIR)
+      File.join(Dir.pwd, REVIEW_DIR, @provider)
     end
 
     def original_file_path
-      File.join(review_dir, "#{@video_id}_original.txt")
+      File.join(review_dir, "#{@video_id}_#{@provider}_original.txt")
     end
 
     def translated_file_path
-      File.join(review_dir, "#{@video_id}_translated_#{@target_lang}.txt")
+      File.join(review_dir, "#{@video_id}_#{@provider}_translated_#{@target_lang}.txt")
     end
 
     def segments_json_path
-      File.join(review_dir, "#{@video_id}_segments.json")
+      File.join(review_dir, "#{@video_id}_#{@provider}_segments.json")
     end
 
     def review_file_path
-      File.join(review_dir, "#{@video_id}_review.txt")
+      File.join(review_dir, "#{@video_id}_#{@provider}_review.txt")
     end
 
     def save_original(segments)
@@ -95,6 +96,7 @@ module YouTubeTranslator
       <<~HEADER
         # YouTube Transcript Review
         # Video ID: #{@video_id}
+        # Provider: #{@provider}
         # Source Language: #{@source_lang}
         # Target Language: #{@target_lang}
         #

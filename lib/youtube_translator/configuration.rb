@@ -13,12 +13,13 @@ module YouTubeTranslator
     DEFAULTS = {
       source_lang: 'en',
       target_lang: 'fr',
-      openai_model: 'gpt-4o-mini',
+      llm_provider: 'openai',
+      llm_model: 'gpt-4o-mini',
       innertube_api_key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8'
     }.freeze
 
-    attr_accessor :source_lang, :target_lang, :openai_model,
-                  :openai_api_key, :innertube_api_key
+    attr_accessor :source_lang, :target_lang, :llm_provider, :llm_model,
+                  :openai_api_key, :anthropic_api_key, :innertube_api_key
 
     def initialize
       load_dotenv
@@ -43,13 +44,16 @@ module YouTubeTranslator
     def load_config_file
       config = load_json_config
       @openai_api_key = config['openai_api_key']
+      @anthropic_api_key = config['anthropic_api_key']
     end
 
     def apply_environment
       @source_lang = ENV.fetch('SOURCE_LANG', @source_lang)
       @target_lang = ENV.fetch('TARGET_LANG', @target_lang)
-      @openai_model = ENV.fetch('OPENAI_MODEL', @openai_model)
+      @llm_provider = ENV.fetch('LLM_PROVIDER', @llm_provider)
+      @llm_model = ENV.fetch('LLM_MODEL', @llm_model)
       @openai_api_key = ENV.fetch('OPENAI_API_KEY', @openai_api_key)
+      @anthropic_api_key = ENV.fetch('ANTHROPIC_API_KEY', @anthropic_api_key)
       @innertube_api_key = ENV.fetch('INNERTUBE_API_KEY', @innertube_api_key)
     end
 

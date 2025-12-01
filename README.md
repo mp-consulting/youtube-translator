@@ -41,20 +41,23 @@ cp .env.example .env
 Create a `.env` file in the project directory with your settings:
 
 ```bash
-# OpenAI API Key (required for ChatGPT translation)
-OPENAI_API_KEY=sk-your-api-key-here
+# LLM Provider (openai, anthropic, or local)
+LLM_PROVIDER=openai
 
-# OpenAI Model (default: gpt-4o-mini)
-OPENAI_MODEL=gpt-4o-mini
+# LLM Model to use
+# OpenAI models: gpt-4o-mini, gpt-4o, gpt-4-turbo
+# Anthropic models: claude-sonnet-4-5-20250929, claude-sonnet-4-20250514
+LLM_MODEL=gpt-4o-mini
+
+# API Keys (set the one for your chosen provider)
+OPENAI_API_KEY=sk-your-api-key-here
+ANTHROPIC_API_KEY=sk-ant-your-api-key-here
 
 # Default source language code
 SOURCE_LANG=en
 
 # Default target language code
 TARGET_LANG=fr
-
-# Always use ChatGPT for translation
-USE_CHATGPT=true
 ```
 
 Alternatively, save your API key to the config file:
@@ -92,20 +95,23 @@ Alternatively, save your API key to the config file:
 ./bin/yt-translator languages VIDEO_ID
 ```
 
-### Translate with ChatGPT
+### Translate with LLM
 
 ```bash
-# Translate to French using ChatGPT
-./bin/yt-translator translate VIDEO_ID --chatgpt -t fr
+# Translate to French using OpenAI (default provider)
+./bin/yt-translator translate VIDEO_ID -t fr
 
-# With .env configured (USE_CHATGPT=true), just run:
-./bin/yt-translator translate VIDEO_ID
+# Explicitly use OpenAI
+./bin/yt-translator translate VIDEO_ID --openai -t fr
+
+# Use Anthropic/Claude
+./bin/yt-translator translate VIDEO_ID --anthropic -t fr
 
 # Use a specific model
-./bin/yt-translator translate VIDEO_ID --chatgpt --model gpt-4o -t es
+./bin/yt-translator translate VIDEO_ID --provider openai --model gpt-4o -t es
 
 # Output as SRT subtitles
-./bin/yt-translator translate VIDEO_ID --chatgpt -t de -f srt -o german.srt
+./bin/yt-translator translate VIDEO_ID -t de -f srt -o german.srt
 ```
 
 ### Review Translations Locally
@@ -114,15 +120,15 @@ The review workflow lets you check and edit translations before finalizing:
 
 ```bash
 # 1. Fetch, translate, and save for review
-./bin/yt-translator review VIDEO_ID --chatgpt -t fr
+./bin/yt-translator review VIDEO_ID -t fr
 
-# This creates files in the reviews/ folder:
-#   - VIDEO_ID_original.txt      (original transcript)
-#   - VIDEO_ID_translated_fr.txt (translated transcript)
-#   - VIDEO_ID_review.txt        (side-by-side for editing)
-#   - VIDEO_ID_segments.json     (timing data)
+# This creates files in the reviews/<provider>/ folder:
+#   - VIDEO_ID_openai_original.txt      (original transcript)
+#   - VIDEO_ID_openai_translated_fr.txt (translated transcript)
+#   - VIDEO_ID_openai_review.txt        (side-by-side for editing)
+#   - VIDEO_ID_openai_segments.json     (timing data)
 
-# 2. Open and edit reviews/VIDEO_ID_review.txt
+# 2. Open and edit reviews/openai/VIDEO_ID_openai_review.txt
 ```
 
 ### Manage Translation Dictionary
@@ -166,13 +172,15 @@ The import/export files use simple JSON format:
 | Option | Description |
 |--------|-------------|
 | `-f, --format FORMAT` | Output format: text, srt, vtt, json (default: text) |
-| `-s, --source LANG` | Source language code (default: cs) |
+| `-s, --source LANG` | Source language code (default: en) |
 | `-t, --target LANG` | Target language code (default: fr) |
 | `-o, --output FILE` | Output to file instead of stdout |
 | `--no-timestamps` | Exclude timestamps from text output |
-| `--chatgpt` | Use ChatGPT API for translation |
-| `--api-key KEY` | OpenAI API key (or set via .env) |
-| `--model MODEL` | OpenAI model (default: gpt-4o-mini) |
+| `--provider PROVIDER` | LLM provider: openai, anthropic, local |
+| `--openai` | Use OpenAI for translation (shortcut) |
+| `--anthropic, --claude` | Use Anthropic/Claude for translation (shortcut) |
+| `--api-key KEY` | API key (or set via .env) |
+| `--model MODEL` | LLM model (default: gpt-4o-mini) |
 | `--save-api-key KEY` | Save API key to config file |
 | `--no-ssl-verify` | Disable SSL certificate verification |
 | `-h, --help` | Show help message |
@@ -223,12 +231,12 @@ youtube-translator/
 
 ## How It Works
 
-### ChatGPT Translation
+### LLM Translation
 
-When using `--chatgpt`, the tool:
+When translating, the tool:
 1. Fetches transcript segments from YouTube via Innertube API
 2. Loads your custom dictionary terms
-3. Sends segments to OpenAI with dictionary terms in the system prompt
+3. Sends segments to OpenAI or Anthropic with dictionary terms in the system prompt
 4. Parses and formats the translated response
 
 Customize the translation prompt by editing `lib/prompts/translation.md`.
@@ -257,10 +265,10 @@ cp .env.example .env
 # Edit .env and add: OPENAI_API_KEY=sk-your-key
 
 # 3. Translate a video to French
-./bin/yt-translator translate VIDEO_ID --chatgpt -t fr
+./bin/yt-translator translate VIDEO_ID -t fr
 
 # 4. Export as SRT subtitles
-./bin/yt-translator translate VIDEO_ID --chatgpt -t fr -f srt -o french.srt
+./bin/yt-translator translate VIDEO_ID -t fr -f srt -o french.srt
 ```
 
 ### Build a Custom Dictionary
@@ -270,8 +278,8 @@ cp .env.example .env
 ./bin/yt-translator dict add "EcoFlow" "EcoFlow" -s cs -t en
 ./bin/yt-translator dict add "battery" "batterie" -s en -t fr
 
-# These terms will be used consistently in ChatGPT translations
-./bin/yt-translator translate VIDEO_ID --chatgpt -t fr
+# These terms will be used consistently in LLM translations
+./bin/yt-translator translate VIDEO_ID -t fr
 ```
 
 ## Troubleshooting
