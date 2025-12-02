@@ -8,7 +8,7 @@ module YouTubeTranslator
       include LlmTranslator
 
       API_URL = 'https://api.anthropic.com/v1/messages'
-      DEFAULT_MODEL = 'claude-sonnet-4-20250514'
+      DEFAULT_MODEL = 'claude-sonnet-4-5-20250929'
 
       def initialize(source_lang, target_lang, options = {})
         super(source_lang, target_lang)
