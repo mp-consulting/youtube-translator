@@ -11,7 +11,7 @@
         "editor.formatOnSave": true,
         "editor.tabSize": 2,
         "[ruby]": {
-          "editor.defaultFormatter": "shopify.ruby-lsp"
+          "editor.defaultFormatter": "Shopify.ruby-lsp"
         }
       }
     }
